@@ -1,24 +1,44 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin'); // Require  html-webpack-plugin plugin
+const webpack = require('webpack');
+const path = require('path');
 
-module.exports = {
-    entry: __dirname + "/src/app/index.js", // webpack entry point. Module to start building dependency graph
+const APP_DIR = path.resolve(__dirname, 'src');
+const BUILD_DIR = path.resolve(__dirname, 'public');
+const NODE_ENV = process.env.NODE_ENV;
+
+const config = {
+    entry: `${APP_DIR}/index.js`,
     output: {
-        path: __dirname + '/dist', // Folder to store generated bundle
-        filename: 'bundle.js',  // Name of generated bundle after build
-        publicPath: '/' // public URL of the output directory when referenced in a browser
+        path: BUILD_DIR,
+        filename: 'assets/js/bundle.js',
     },
-    module: {  // where we defined file patterns and their loaders
+    resolve: {
+        extensions: ['.js', '.json'],
+        modules: [APP_DIR, 'node_modules'],
+        alias: {
+            // https://github.com/webpack/webpack/issues/4666
+            constants: `${APP_DIR}/constants`,
+        },
+    },
+    devtool: 'source-map',
+    module: {
         rules: [
-        ]
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: ['babel-loader'],
+                include: APP_DIR,
+            },
+            {
+                test: [/\.vert$/, /\.frag$/, /\.glsl$/],
+                use: ['raw-loader'],
+            }
+        ],
     },
-    plugins: [  // Array of plugins to apply to build chunk
-        new HtmlWebpackPlugin({
-            template: __dirname + "/src/public/index.html",
-            inject: 'body'
-        })
-    ],
-    devServer: {  // configuration for webpack-dev-server
-        contentBase: './src/public',  //source of static assets
-        port: 7700, // port to run dev-server
-    }
+    devServer: {
+        contentBase: BUILD_DIR,
+        port: 8080,
+        stats: 'minimal',
+    },
 };
+
+module.exports = config;
