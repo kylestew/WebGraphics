@@ -1,7 +1,7 @@
 // Extras
 // export {Plane} from './extras/Plane.js';
+export {Plane} from './extras/plane.js';
 export {Cube} from './extras/cube.js';
-// export {Sphere} from './extras/Sphere.js';
 // export {Orbit} from './extras/Orbit.js';
 // export {Raycast} from './extras/Raycast.js';
 // // export {Curve} from './extras/Curve.js';
