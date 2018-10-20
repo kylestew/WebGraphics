@@ -1,6 +1,6 @@
 import {Transform} from './transform.js';
-// import {Mat3} from '../math/Mat3.js';
-// import {Mat4} from '../math/Mat4.js';
+import {Mat3} from '../math/mat3.js';
+import {Mat4} from '../math/mat4.js';
 
 let ID = 0;
 
@@ -16,15 +16,23 @@ export class Mesh extends Transform {
         this.gl = gl;
         this.id = ID++;
 
-        console.warn("TODO: MAT Uniforms for mesh - modelViewMatrix + normalMatrix");
-
         this.geometry = geometry;
         this.program = program;
         this.mode = mode;
+
+        this.modelViewMatrix = new Mat4();
+        this.normalMatrix = new Mat3();
+
+        // add empty matrix uniforms to program if unset
+        // if (!this.program.uniforms.modelMatrix) {
+        //     Object.assign(this.program.uniforms {
+        //         modelMatrix: { value: null },
+        //     });
+        // }
     }
 
     draw({
-        camera,
+             camera,
          } = {}) {
 
         // set the matrix uniforms

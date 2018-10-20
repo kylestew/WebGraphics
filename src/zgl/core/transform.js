@@ -1,4 +1,5 @@
 import {Vec3} from '../math/vec3';
+import {Euler} from '../math/euler.js';
 
 export class Transform {
     constructor() {
@@ -7,6 +8,7 @@ export class Transform {
         this.visible = true;
 
         this.position = new Vec3();
+        this.rotation = new Euler();
     }
 
     setParent(parent, notifyParent = true) {

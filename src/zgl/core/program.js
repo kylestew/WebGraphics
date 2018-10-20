@@ -74,16 +74,28 @@ export class Program {
         // this.checkTextureUnits();
     }
 
+    applyState() {
+        // if (this.depthTest) this.gl.renderer.enable(this.gl.DEPTH_TEST);
+    }
+
     use({
         programActive = false,
         flipFaces = false,
         } = {}) {
 
-        console.warn("TODO: bind shader program");
-    }
+        // avoid gl call if program already in use
+        if (!programActive) {
+            console.log("activating program", this.program);
+            this.gl.useProgram(this.program);
+            this.gl.renderer.currentProgram = this.id;
+        }
 
-    applyState() {
-        // if (this.depthTest) this.gl.renderer.enable(this.gl.DEPTH_TEST);
+        // set only the active uniforms found in the shader
+        //...
+
+
+        // this.applyState();
+
     }
 }
 
