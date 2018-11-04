@@ -32,14 +32,13 @@ export class Geometry {
         attr.normalize = attr.normalize || false;
         attr.buffer = this.gl.createBuffer();
         attr.count = attr.data.length / attr.size;
-        // attr.divisor = !attr.instanced ? 0 :
 
         console.log(key, attr);
 
         // push data to buffer
         this.updateAttribute(attr);
 
-        // update geometry counts
+        // update geometry counts based on index array
         if (key === 'index') {
             this.drawRange.count = attr.count;
         }
@@ -51,40 +50,40 @@ export class Geometry {
         this.gl.bindBuffer(attr.target, null);
     }
 
-    createVAO(program) {
-        console.log("creating VAO");
-
-        this.vao = this.gl.renderer.createVertexArray();
-        this.gl.renderer.bindVertexArray(this.vao);
-        this.bindAttributes(program);
-    }
-
-    bindAttributes(program) {
-        // link all attributes to program using gl.vertexAttribPointer
-        program.attributeLocations.forEach( (location, name) => {
-            const attr = this.attributes[name];
-
-            console.log("Binding attribute \"" + name + "\" to location", location, "with", attr);
-
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, attr.buffer);
-            this.gl.vertexAttribPointer(
-                location,
-                attr.size,
-                attr.type,
-                attr.normalize,
-                0, // stride
-                0 // offset
-            );
-            this.gl.enableVertexAttribArray(location);
-        });
-
-        // bind indices if geometry indexed
-        if (this.attributes.index) {
-            console.log("Binding index array");
-
-            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.attributes.index.buffer);
-        }
-    }
+    // createVAO(program) {
+    //     console.log("creating VAO");
+    //
+    //     this.vao = this.gl.renderer.createVertexArray();
+    //     this.gl.renderer.bindVertexArray(this.vao);
+    //     this.bindAttributes(program);
+    // }
+    //
+    // bindAttributes(program) {
+    //     // link all attributes to program using gl.vertexAttribPointer
+    //     program.attributeLocations.forEach( (location, name) => {
+    //         const attr = this.attributes[name];
+    //
+    //         console.log("Binding attribute \"" + name + "\" to location", location, "with", attr);
+    //
+    //         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, attr.buffer);
+    //         this.gl.vertexAttribPointer(
+    //             location,
+    //             attr.size,
+    //             attr.type,
+    //             attr.normalize,
+    //             0, // stride
+    //             0 // offset
+    //         );
+    //         this.gl.enableVertexAttribArray(location);
+    //     });
+    //
+    //     // bind indices if geometry indexed
+    //     if (this.attributes.index) {
+    //         console.log("Binding index array");
+    //
+    //         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.attributes.index.buffer);
+    //     }
+    // }
 
     draw({
         program,
@@ -92,25 +91,25 @@ export class Geometry {
         geometryBound = false,
          }) {
 
-        if (!geometryBound) {
-            console.log("binding geometry...");
-
-            // create VAO on first draw.
-            // Needs to wait for program to get attribute locations.
-            if (!this.vao) this.createVAO(program);
-
-            // bind if not already bound to program
-            this.gl.renderer.bindVertexArray(this.vao);
-
-            // store so doesn't bind reduntantly
-            this.gl.renderer.currentGeometry = this.id;
-        }
-
-        if (this.attributes.index) {
-            console.log("drawElements", mode, this.drawRange, this.attributes.index);
-
-            this.gl.drawElements(mode, this.drawRange.count, this.attributes.index.type, this.drawRange.start);
-        }
+        // if (!geometryBound) {
+        //     console.log("binding geometry...");
+        //
+        //     // create VAO on first draw.
+        //     // Needs to wait for program to get attribute locations.
+        //     if (!this.vao) this.createVAO(program);
+        //
+        //     // bind if not already bound to program
+        //     this.gl.renderer.bindVertexArray(this.vao);
+        //
+        //     // store so doesn't bind reduntantly
+        //     this.gl.renderer.currentGeometry = this.id;
+        // }
+        //
+        // if (this.attributes.index) {
+        //     console.log("drawElements", mode, this.drawRange, this.attributes.index);
+        //
+        //     this.gl.drawElements(mode, this.drawRange.count, this.attributes.index.type, this.drawRange.start);
+        // }
     }
 
 }

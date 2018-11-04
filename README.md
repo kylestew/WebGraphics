@@ -1,3 +1,8 @@
+### Running
+
+    $ yarn dev
+
+
 https://scotch.io/tutorials/setting-up-webpack-for-any-project
 
 https://github.com/oliverbenns/webgl-starter

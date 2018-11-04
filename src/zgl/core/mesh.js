@@ -21,14 +21,16 @@ export class Mesh extends Transform {
         this.mode = mode;
 
         this.modelViewMatrix = new Mat4();
-        this.normalMatrix = new Mat3();
+        // this.normalMatrix = new Mat3();
 
         // add empty matrix uniforms to program if unset
-        // if (!this.program.uniforms.modelMatrix) {
-        //     Object.assign(this.program.uniforms {
-        //         modelMatrix: { value: null },
-        //     });
-        // }
+        if (!this.program.uniforms.modelMatrix) {
+            Object.assign(this.program.uniforms, {
+                modelMatrix: { value: null },
+                modelViewMatrix: { value: null },
+                projectionMatrix: { value: null },
+            });
+        }
     }
 
     draw({
@@ -36,19 +38,26 @@ export class Mesh extends Transform {
          } = {}) {
 
         // set the matrix uniforms
-        //...
+        if (camera) {
+            this.program.uniforms.projectionMatrix.value = camera.projectionMatrix;
+            console.log("projectionMatrix", camera.projectionMatrix);
 
-        // determine if faces need to be flipped - when mesh scaled negatively
-        let flipFaces = false;
+            this.modelViewMatrix.multiply(camera.viewMatrix, this.worldMatrix);
 
-        // check here if any bindings can be skipped
-        // geometry also needs to be rebound if different program
+            this.program.uniforms.modelViewMatrix.value = this.modelViewMatrix;
+            console.log("modelViewMatrix", this.modelViewMatrix);
+        }
+
+        // // determine if faces need to be flipped - when mesh scaled negatively
+        // let flipFaces = false;
+        //
+        // // check here if any bindings can be skipped
+        // // geometry also needs to be rebound if different program
         const programActive = this.gl.renderer.currentProgram === this.program.id;
         const geometryBound = programActive && this.gl.renderer.currentGeometry === this.geometry.id;
 
-        this.program.use({programActive, flipFaces});
+        this.program.use({programActive});
+        // this.program.use({programActive, flipFaces});
         this.geometry.draw({mode: this.mode, program: this.program, geometryBound});
-
     }
-
 }

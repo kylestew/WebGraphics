@@ -21,6 +21,22 @@ export class Program {
         if (!vertex) console.warn('vertex shader not supplied');
         if (!fragment) console.warn('fragment shader not supplied');
 
+        // Store program state
+        this.transparent = transparent;
+        // this.cullFace = cullFace;
+        // this.frontFace = frontFace;
+        // this.depthTest = depthTest;
+        // this.depthWrite = depthWrite;
+        // this.depthFunc = depthFunc;
+        this.blendFunc = {};
+        // this.blendEquation = {};
+
+        // set default blendFunc if transparent flagged
+        if (this.transparent && !this.blendFunc.src) {
+            if (this.gl.renderer.premultipliedAlpha) this.setBlendFunc(this.gl.ONE, this.gl.ONE_MINUS_SRC_ALPHA);
+            else this.setBlendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+        }
+
         // compile vertex shader and log errors
         const vertexShader = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vertexShader, vertex);
@@ -60,7 +76,7 @@ export class Program {
             // trim uniforms' names to omit array declarations
             uniform.uniformName = uniform.name.split('[')[0];
         }
-        console.log("uniforms", this.uniformLocations);
+        console.log("uniformLocations", this.uniformLocations);
 
         // Get active attribute locations
         this.attributeLocations = new Map();
@@ -69,13 +85,20 @@ export class Program {
             let attribute = gl.getActiveAttrib(this.program, aIndex);
             this.attributeLocations.set(attribute.name, gl.getAttribLocation(this.program, attribute.name));
         }
-        console.log("attributes", this.attributeLocations);
-
-        // this.checkTextureUnits();
+        console.log("attributeLocations", this.attributeLocations);
     }
 
+    // setBlendFunc(src, dst, srcAlpha, dstAlpha) {
+    //     this.blendFunc.src = src;
+    //     this.blendFunc.dst = dst;
+    //     this.blendFunc.srcAlpha = srcAlpha;
+    //     this.blendFunc.dstAlpha = dstAlpha;
+    //     if (src) this.transparent = true;
+    // }
+
     applyState() {
-        // if (this.depthTest) this.gl.renderer.enable(this.gl.DEPTH_TEST);
+    //     if (this.blendFunc.src) this.gl.renderer.enable(this.gl.BLEND);
+    //     else this.gl.renderer.disable(this.gl.BLEND);
     }
 
     use({
@@ -91,12 +114,43 @@ export class Program {
         }
 
         // set only the active uniforms found in the shader
-        //...
+        this.uniformLocations.forEach((location, activeUniform) => {
+            const name = activeUniform.uniformName;
 
+            // get supplied uniform
+            const uniform = this.uniforms[name];
+            if (!uniform) {
+                return console.warn(`Active uniform ${name} has not been supplied`);
+            }
+            if (uniform && uniform.value === undefined) {
+                return console.warn(`${name} uniform is missing a value parameter`);
+            }
 
-        // this.applyState();
+            // TODO: uniform support for textures
 
+            console.log("Binding uniform", activeUniform.name, activeUniform.type, location, uniform.value);
+            setUniform(this.gl, activeUniform.type, location, uniform.value);
+        });
+
+        this.applyState();
     }
+}
+
+function setUniform(gl, type, location, value) {
+    switch (type) {
+        case 35676: return gl.uniformMatrix4fv(location, false, value[0].length ? flatten(value) : value); // FLOAT_MAT4
+        default: console.error("Uniform type not yet supported", type);
+    }
+}
+
+function flatten(array) {
+    const arrayLen = array.length;
+    const valueLen = array[0].length;
+    const length = arrayLen * valueLen;
+    let value = arrayCacheF32[length];
+    if (!value) arrayCacheF32[length] = value = new Float32Array(length);
+    for (let i = 0; i < arrayLen; i++) value.set(array[i], i * valueLen);
+    return value;
 }
 
 function addLineNumbers(string) {
@@ -106,3 +160,4 @@ function addLineNumbers(string) {
     }
     return lines.join('\n');
 }
+

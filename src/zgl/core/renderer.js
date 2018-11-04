@@ -22,7 +22,7 @@ export class Renderer {
         // assume webgl 2
         this.gl = canvas.getContext('webgl2');
 
-        // attach renderer to gl so that all classes have access to internal state functions
+        // attach our renderer to gl so that all classes have access to internal state functions
         this.gl.renderer = this;
 
         // init size values
@@ -36,8 +36,6 @@ export class Renderer {
 
         this.state.framebuffer = null;
         this.state.viewport = {width: null, height: null};
-
-
 
         // create method aliases
         this.bindVertexArray = this.gl.renderer.getExtension('OES_vertex_array_object', 'bindVertexArray', 'bindVertexArrayOES');
@@ -62,6 +60,20 @@ export class Renderer {
         this.state.viewport.width = width;
         this.state.viewport.height = height;
         this.gl.viewport(0, 0, width, height);
+
+        console.log("setViewport", width, height);
+    }
+
+    enable(id) {
+        if (this.state[id] === true) return;
+        this.gl.enable(id);
+        this.state[id] = true;
+    }
+
+    disable(id) {
+        if (this.state[id] === false) return;
+        this.gl.disable(id);
+        this.state[id] = false;
     }
 
     getExtension(extension, webgl2Func, extFunc) {
@@ -102,25 +114,30 @@ export class Renderer {
     render({
                scene,
                camera,
-               target = null,
+        update = true
            }) {
 
         this.bindFramebuffer();
+
         this.setViewport(this.width * this.dpr, this.height * this.dpr);
 
         if (this.autoClear) {
             this.gl.clear((this.color ? this.gl.COLOR_BUFFER_BIT : 0) | (this.depth ? this.gl.DEPTH_BUFFER_BIT : 0) | (this.stencil ? this.gl.STENCIL_BUFFER_BIT : 0));
         }
 
+        // update all scene graph matrices
+        if (update) scene.updateMatrixWorld();
+
+        // update the camera separately if not in scene graph
+        if (camera && camera.parent === null) camera.updateMatrixWorld();
 
         // get render list - entails culling and sorting
         const renderList = this.getRenderList({scene, camera});
         console.log("renderList", renderList);
 
         renderList.forEach(node => {
-            console.log("drawing", node);
+            console.log("rendering", node);
             node.draw({camera});
         });
     }
-
 }
