@@ -16,5 +16,8 @@
   "scripts": {
     "dev": "webpack-dev-server --mode development --open --hot --inline",
     "build": "webpack --mode production"
+  },
+  "dependencies": {
+    "ogl": "^0.0.9"
   }
 }
